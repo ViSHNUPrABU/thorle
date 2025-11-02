@@ -1,7 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StaticLayout, registerComponent } from './components/Layout/StaticLayout';
-import { DashboardLayout } from './components/Layout/DashboardLayout';
+import { Dashboard } from './components/Dashboard/Dashboard';
 import { DashboardListPage } from './components/Dashboard/DashboardListPage';
 import { appConfig } from './configs/dashboards';
 import { useState } from 'react';
@@ -66,59 +66,17 @@ const ContentArea = () => {
     <Routes>
       <Route path="/" element={<Navigate to="/dashboards" replace />} />
       <Route path="/dashboards" element={<DashboardListPage />} />
-      <Route path="/dash/:dashboardId" element={<DashboardPageRoute />} />
+      <Route path="/dash/:dashboardId" element={<Dashboard />} />
     </Routes>
   );
 };
-
-// Dashboard Page Component
-interface DashboardPageProps {
-  dashboardId?: string;
-}
-
-const DashboardPage: React.FC<DashboardPageProps> = ({ dashboardId }) => {
-  const params = useParams<{ dashboardId: string }>();
-  const id = dashboardId || params.dashboardId;
-  
-  if (!id) {
-    return <DashboardListPage />;
-  }
-
-  const dashboardConfig = appConfig.dashboards.find(d => d.id === id);
-  
-  if (!dashboardConfig) {
-    return (
-      <div style={{ 
-        padding: '2rem', 
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        height: '100%',
-      }}>
-        <h2 style={{ color: '#d32f2f', marginBottom: '1rem' }}>Dashboard Not Found</h2>
-        <p style={{ color: '#666' }}>The dashboard "{id}" does not exist.</p>
-      </div>
-    );
-  }
-  
-  return <DashboardLayout config={dashboardConfig} />;
-};
-
-// Route wrapper to extract params
-function DashboardPageRoute() {
-  const { dashboardId } = useParams<{ dashboardId: string }>();
-  return <DashboardPage dashboardId={dashboardId} />;
-}
 
 // Register components for StaticLayout
 registerComponent('AppTitle', AppTitle);
 registerComponent('SidebarNavItem', SidebarNavItem);
 registerComponent('ContentArea', ContentArea);
 registerComponent('DashboardListPage', DashboardListPage);
-registerComponent('DashboardLayout', DashboardLayout);
-registerComponent('DashboardPage', DashboardPage);
+registerComponent('Dashboard', Dashboard);
 
 function App() {
   return (

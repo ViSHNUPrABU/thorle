@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
-import type { ApiDataSource } from '../types/config';
+import type { ApiDataSource, DashboardApiResponse } from '../types/config';
 import { interpolateObject } from '../utils/templating';
 import { contextService } from './contextService';
 
@@ -24,6 +24,32 @@ async function fetchData(dataSource: ApiDataSource, context: Record<string, any>
   
   const response = await axios(config);
   return response.data;
+}
+
+/**
+ * Fetch complete dashboard configuration from API
+ */
+export async function fetchDashboardConfig(dashboardId: string): Promise<DashboardApiResponse> {
+  const response = await axios.get(`/api/dashboards/${dashboardId}`);
+  return response.data;
+}
+
+/**
+ * Custom hook to fetch dashboard config with react-query
+ */
+export function useDashboardConfig(dashboardId: string | undefined) {
+  return useQuery({
+    queryKey: ['dashboard-config', dashboardId],
+    queryFn: () => {
+      if (!dashboardId) {
+        throw new Error('Dashboard ID is required');
+      }
+      return fetchDashboardConfig(dashboardId);
+    },
+    enabled: !!dashboardId,
+    staleTime: 60000, // Cache for 1 minute
+    retry: 3,
+  } as UseQueryOptions<DashboardApiResponse>);
 }
 
 /**

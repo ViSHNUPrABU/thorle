@@ -124,4 +124,14 @@ export type AppConfig = {
   nav: NavItemConfig[];
   navLayout?: StaticLayoutConfig; // Optional: Full navbar layout config
   dashboards: DashboardLayoutConfig[];
+  // API endpoint to fetch dashboards from (optional)
+  dashboardsApiUrl?: string;
+};
+
+// API Response type for dashboard config fetch
+export type DashboardApiResponse = {
+  id: string;
+  title: string;
+  layout: WidgetConfig[];
+  meta?: Record<string, any>;
 };

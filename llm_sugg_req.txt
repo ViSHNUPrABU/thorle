@@ -1,0 +1,296 @@
+Perfect! Here’s a **full upgraded one-shot prompt** ready to feed into your local coding agent. It includes **react-query + axios, react-router, Zustand, ajv**, while keeping everything else from the original architecture **config-driven, modular, typed, performant**.
+
+---
+
+## **ONE-SHOT PROMPT — Config-Driven Observability Dashboard with Extra Libraries**
+
+**Goal:**
+Build a production-ready **config-driven Observability Dashboard** (DataDog-like) using **React + TypeScript + Vite**. The UI must be **100% driven by typed configs** (dashboards, widgets, layout, nav, visibility rules, API endpoints). Use the following **libraries**:
+
+---
+
+### **Allowed Libraries**
+
+1. `react-grid-layout` – draggable/resizable dashboard layout.
+2. `echarts-for-react` + `echarts` – chart rendering.
+3. `mantine-react-table` – optional TableWidget.
+4. `react-query` + `axios` – API fetching, caching, polling, and retries.
+5. `react-router` – routing and shareable URLs (`/dash/:dashboardId`).
+6. `Zustand` or `Redux` – global state / cross-widget context management.
+7. `ajv` – optional runtime validation for dashboard/widget configs.
+
+**No other libraries** without explicit approval. Any library request must explain the use case and tradeoffs.
+
+---
+
+### **Project Setup**
+
+```bash
+npm create vite@latest my-dashboard -- --template react-ts
+cd my-dashboard
+npm install react-grid-layout echarts echarts-for-react mantine-react-table @mantine/core @mantine/hooks
+npm install react-query axios react-router-dom zustand ajv
+npm run dev
+```
+
+---
+
+### **High-Level Architecture**
+
+1. **App Shell**
+
+   * `NavBar` (top) + `Sidebar` (left) — initially contains “Dashboards”.
+   * Routing handled by `react-router-dom`. Shareable URLs: `/dash/:dashboardId?state=...`.
+
+2. **Dashboard Page**
+
+   * `Dashboard` component: renders `WidgetWrapper`s in a **react-grid-layout** grid.
+   * Supports drag/resize. Layout persisted in URL + localStorage.
+
+3. **WidgetWrapper** (core)
+
+   * Handles:
+
+     * Fetching data via `react-query` + `axios` (supports polling, caching, retries).
+     * Visibility evaluation from config (cross-widget context).
+     * Loading / Empty / Error templates.
+     * Cross-widget communication via `Zustand` or `Redux`.
+   * Lazy-loads heavy widgets (`echarts`, `mantine-react-table`) for performance.
+
+4. **Widgets (100% config-driven)**
+
+   * **ChartWidget** – echarts wrapper. Accepts ECharts options or small DSL in config.
+   * **TableWidget** – mantine-react-table wrapper; fallback to plain table if Mantine not installed.
+   * **DataWidget** – plain React cards to display numbers, KPIs, mini sparklines (echarts optional).
+
+5. **Services**
+
+   * **APIService** – wrapper for react-query + axios. Supports: templated URLs, retries, polling, cache TTL, transform hooks.
+   * **ContextService** – global context using Zustand/Redux. Supports get/set/subscribe/publish for keys. Optional URL sync for shared state.
+   * **Config Validation** – optional ajv schema validation at runtime for dashboards and widgets.
+
+---
+
+### **Config & Types (TypeScript)**
+
+```ts
+// src/types/config.ts
+export type WidgetType = "chart" | "table" | "data";
+
+export type VisibilityOperator = "eq" | "ne" | "in" | "gt" | "lt";
+
+export type VisibilityRule = {
+  contextKey: string;
+  op: VisibilityOperator;
+  value: any;
+};
+
+export type ApiDataSource = {
+  id?: string;
+  method?: "GET" | "POST";
+  url: string;
+  headers?: Record<string,string>;
+  params?: Record<string,string>;
+  body?: any;
+  polling?: { intervalMs: number; stopOnError?: boolean };
+  cacheTTL?: number;
+};
+
+export type BaseWidgetConfig = {
+  id: string;
+  type: WidgetType;
+  title?: string;
+  position?: { x:number,y:number,w:number,h:number,minW?:number,minH?:number };
+  visibility?: VisibilityRule[];
+  dataSource?: ApiDataSource;
+  contextBindings?: string[];
+};
+
+export type ChartWidgetConfig = BaseWidgetConfig & {
+  type: "chart";
+  chartType: "line"|"bar"|"area"|"heatmap"|"gauge"|"custom";
+  echartsOption?: any;
+  seriesConfig?: any;
+};
+
+export type ColumnDef = { id: string; label: string; sortable?: boolean; render?: string };
+
+export type TableWidgetConfig = BaseWidgetConfig & {
+  type: "table";
+  columns: ColumnDef[];
+  pagination?: { mode: "client" | "server"; pageSize: number };
+};
+
+export type DataWidgetConfig = BaseWidgetConfig & {
+  type: "data";
+  layout: "stat" | "list" | "kpi";
+  fields: { key:string; label?:string; format?:string }[];
+};
+
+export type WidgetConfig = ChartWidgetConfig | TableWidgetConfig | DataWidgetConfig;
+
+export type DashboardConfig = {
+  id: string;
+  title: string;
+  layout: WidgetConfig[];
+  meta?: Record<string, any>;
+};
+
+export type NavItem = { id: string; label: string; route: string; icon?: string };
+
+export type AppConfig = {
+  nav: NavItem[];
+  dashboards: DashboardConfig[];
+};
+```
+
+---
+
+### **Example Dashboard Config**
+
+```ts
+// src/configs/dashboards.ts
+import { AppConfig } from "../types/config";
+
+export const appConfig: AppConfig = {
+  nav: [{ id: "dashboards", label: "Dashboards", route: "/dashboards" }],
+  dashboards: [
+    {
+      id: "infra-overview",
+      title: "Infra Overview",
+      layout: [
+        {
+          id: "cpu-chart",
+          type: "chart",
+          title: "CPU Usage",
+          position: { x:0,y:0,w:6,h:4 },
+          dataSource: {
+            url: "/api/metrics/cpu?host={{selected.host}}&range={{timeRange}}",
+            method: "GET",
+            polling: { intervalMs: 15000 },
+            cacheTTL: 5000
+          },
+          chartType: "line",
+          echartsOption: { title:{text:"CPU"} }
+        },
+        {
+          id: "top-procs",
+          type: "table",
+          title: "Top Processes",
+          position: { x:6,y:0,w:6,h:4 },
+          dataSource: { url: "/api/processes?host={{selected.host}}", method:"GET" },
+          columns: [
+            { id: "name", label:"Process" },
+            { id: "cpu", label:"CPU %", sortable:true },
+            { id: "mem", label:"Memory" }
+          ]
+        },
+        {
+          id: "host-kpi",
+          type: "data",
+          title: "Host KPI",
+          position: { x:0,y:4,w:12,h:2 },
+          dataSource: { url: "/api/hosts/{{selected.host}}/kpi", method:"GET" },
+          layout: "stat",
+          fields: [{ key:"uptime", label:"Uptime" }, { key:"status", label:"Status" }]
+        }
+      ]
+    }
+  ]
+};
+```
+
+---
+
+### **WidgetWrapper Responsibilities**
+
+* Evaluate visibility rules from config using context (Zustand/Redux).
+* Fetch data via react-query + axios. Polling, retries, caching handled.
+* Show Loading / Empty / Error templates.
+* Publish data to context if `contextBindings` exist.
+* Lazy-load heavy widgets (`echarts`, Mantine tables).
+
+---
+
+### **Routing & Shareable URLs**
+
+* Use `react-router` for routes `/dash/:dashboardId`.
+* Load dashboard by ID from `appConfig`. Show 404 if not found.
+* Encode any shareable state in query params (e.g., timeRange, selected.host).
+
+---
+
+### **Config Validation**
+
+* Optionally use `ajv` to validate dashboard config at runtime.
+* Validate widget types, layout positions, dataSource, visibility rules.
+
+---
+
+### **Performance & Best Practices**
+
+* Lazy-load widgets and heavy libs.
+* Memoize widget computations (`React.memo`, `useMemo`).
+* Limit polling frequency on inactive tabs (Page Visibility API optional).
+* Avoid `eval` and `dangerouslySetInnerHTML`.
+
+---
+
+### **Recommended File Structure**
+
+```
+src/
+  index.tsx
+  App.tsx
+  router/
+    routes.tsx
+  components/
+    NavBar/
+      NavBar.tsx
+      Sidebar.tsx
+    Dashboard/
+      Dashboard.tsx
+      useDashboardConfig.ts
+    Widget/
+      WidgetWrapper.tsx
+      ChartWidget.tsx
+      TableWidget.tsx
+      DataWidget.tsx
+    common/
+      Loading.tsx
+      Empty.tsx
+      Error.tsx
+  services/
+    apiService.ts   # react-query + axios
+    contextService.ts  # Zustand/Redux
+    validation.ts      # ajv schema
+  types/
+    config.ts
+  configs/
+    dashboards.ts
+    nav.ts
+  utils/
+    templating.ts
+    visibility.ts
+  styles/
+    global.css
+```
+
+---
+
+### **Suggested First 8 Commits**
+
+1. `init: vite react-ts scaffold + deps`
+2. `feat: react-router setup + NavBar + Sidebar`
+3. `feat: typescript config types + dashboard config sample`
+4. `feat: Dashboard component + react-grid-layout integration`
+5. `feat: APIService using react-query + axios`
+6. `feat: ContextService using Zustand / Redux`
+7. `feat: WidgetWrapper (loading/empty/error + visibility evaluation)`
+8. `feat: ChartWidget, TableWidget, DataWidget implementations (lazy loaded)`
+
+---
+
+This is now **fully ready to paste into a coding agent**, which can generate the full app, configs, services, widgets, routing, and context integration.
+
+---

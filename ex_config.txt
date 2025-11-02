@@ -1,0 +1,33 @@
+config = {
+    component: "StaticLayout",
+    config: {
+        component: "Page",
+        widgets: [
+            {
+                component: "AppTitle",
+                config: {
+                    styles: {
+                        fontSize: 24
+                    }
+                },
+                width: "10%"
+            },
+            {
+                component: "NavBar",
+                config: {
+                    items: [
+                        {
+                            id: "dashboard-home",
+                            name: "Dashboard",
+                            component: "DashboardListPage"
+                            route: "/dashboard",
+                            dataSource: {
+                                url: "/api/dashboard_list"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

@@ -53,16 +53,75 @@ export type DataWidgetConfig = BaseWidgetConfig & {
 
 export type WidgetConfig = ChartWidgetConfig | TableWidgetConfig | DataWidgetConfig;
 
-export type DashboardConfig = {
+// Static Layout types for non-grid layouts
+export type LayoutDirection = "row" | "column";
+
+export type StaticLayoutItem = {
+  // Type can be inferred from presence of properties (D3-like structure)
+  // No ID required - structure is implicit
+  
+  // Widget type - has widgetConfig
+  widgetConfig?: WidgetConfig;
+  
+  // Layout type - has direction and children
+  direction?: LayoutDirection;
+  children?: StaticLayoutItem[];
+  
+  // Component type - has component name
+  component?: string;
+  props?: Record<string, any>;
+  
+  // Size properties - more flexible
+  // Can use: "200px", "20%", "10rem", or omit for flex
+  width?: string | number;  // number = pixels, string = CSS value
+  height?: string | number; // number = pixels, string = CSS value
+  
+  // Flex only used when width/height not specified
+  // Omit flex to auto-calculate remaining space
+  flex?: number;
+  
+  // Styling
+  style?: React.CSSProperties;
+  
+  // Conditional rendering
+  visibility?: VisibilityRule[];
+};
+
+export type StaticLayoutConfig = {
+  direction: LayoutDirection;
+  children: StaticLayoutItem[]; // Renamed from 'items' to 'children' for D3-like structure
+  width?: string | number;
+  height?: string | number;
+  style?: React.CSSProperties;
+};
+
+// Dashboard Layout types
+export type DashboardLayoutConfig = {
   id: string;
   title: string;
   layout: WidgetConfig[];
   meta?: Record<string, any>;
 };
 
-export type NavItem = { id: string; label: string; route: string; icon?: string };
+// Legacy type alias
+export type DashboardConfig = DashboardLayoutConfig;
+
+// Navigation item with optional widget rendering on right side
+export type NavItemConfig = {
+  id: string;
+  label: string;
+  route?: string;
+  icon?: string;
+  // If specified, clicking this nav item shows these widgets on the right
+  rightWidgets?: StaticLayoutConfig;
+  // Or render a specific dashboard
+  dashboardId?: string;
+};
+
+export type NavItem = NavItemConfig;
 
 export type AppConfig = {
-  nav: NavItem[];
-  dashboards: DashboardConfig[];
+  nav: NavItemConfig[];
+  navLayout?: StaticLayoutConfig; // Optional: Full navbar layout config
+  dashboards: DashboardLayoutConfig[];
 };

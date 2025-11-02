@@ -1,10 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, useNavigate, useRoutes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StaticLayout, registerComponent } from './components/Layout/StaticLayout';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { DashboardListPage } from './components/Dashboard/DashboardListPage';
 import { appConfig } from './configs/dashboards';
-import { useState } from 'react';
 import './App.css';
 
 // Create a client
@@ -33,22 +32,20 @@ const AppTitle = () => (
 interface SidebarNavItemProps {
   itemId: string;
   label: string;
+  path: string;
 }
 
-const SidebarNavItem: React.FC<SidebarNavItemProps> = ({ label }) => {
+const SidebarNavItem: React.FC<SidebarNavItemProps> = ({ label, path }) => {
   const navigate = useNavigate();
-  const [isHovered, setIsHovered] = useState(false);
-  const isSelected = window.location.pathname.startsWith('/dashboards');
+  const isSelected = window.location.pathname === path || (path !== '/' && window.location.pathname.startsWith(path));
 
   return (
     <div
-      onClick={() => navigate('/dashboards')}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => navigate(path)}
       style={{
         padding: '0.75rem 1rem',
         cursor: 'pointer',
-        background: isSelected ? '#e3f2fd' : isHovered ? '#f0f0f0' : 'transparent',
+        background: isSelected ? '#e3f2fd' : 'transparent',
         borderLeft: isSelected ? '3px solid #1976d2' : '3px solid transparent',
         fontWeight: isSelected ? 600 : 400,
         color: isSelected ? '#1976d2' : '#333',
@@ -60,23 +57,37 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({ label }) => {
   );
 };
 
+// A simple component registry for route elements
+const routeComponentRegistry: Record<string, React.ComponentType<any>> = {
+  DashboardListPage,
+  Dashboard,
+};
+
 // Content Area Component - renders based on route
-const ContentArea = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/dashboards" replace />} />
-      <Route path="/dashboards" element={<DashboardListPage />} />
-      <Route path="/dash/:dashboardId" element={<Dashboard />} />
-    </Routes>
-  );
+const ContentArea = ({ routes, defaultPath = '/' }: { routes?: { path: string; component: string }[], defaultPath?: string }) => {
+  const generatedRoutes = routes?.map(route => {
+    const Component = routeComponentRegistry[route.component];
+    return {
+      path: route.path,
+      element: Component ? <Component /> : <Navigate to={defaultPath} replace />,
+    };
+  }) || [];
+
+  // Add a default route
+  generatedRoutes.push({
+    path: '/',
+    element: <Navigate to={defaultPath} replace />,
+  });
+  
+  const element = useRoutes(generatedRoutes);
+
+  return element;
 };
 
 // Register components for StaticLayout
 registerComponent('AppTitle', AppTitle);
 registerComponent('SidebarNavItem', SidebarNavItem);
 registerComponent('ContentArea', ContentArea);
-registerComponent('DashboardListPage', DashboardListPage);
-registerComponent('Dashboard', Dashboard);
 
 function App() {
   return (

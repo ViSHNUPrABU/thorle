@@ -35,6 +35,14 @@ export async function fetchDashboardConfig(dashboardId: string): Promise<Dashboa
 }
 
 /**
+ * Fetch the list of all available dashboards
+ */
+export async function fetchDashboardList(): Promise<{ id: string; title: string; description: string }[]> {
+  const response = await axios.get('/api/dashboards');
+  return response.data;
+}
+
+/**
  * Custom hook to fetch dashboard config with react-query
  */
 export function useDashboardConfig(dashboardId: string | undefined) {
@@ -50,6 +58,17 @@ export function useDashboardConfig(dashboardId: string | undefined) {
     staleTime: 60000, // Cache for 1 minute
     retry: 3,
   } as UseQueryOptions<DashboardApiResponse>);
+}
+
+/**
+ * Custom hook to fetch the list of dashboards
+ */
+export function useDashboardList() {
+  return useQuery({
+    queryKey: ['dashboard-list'],
+    queryFn: fetchDashboardList,
+    staleTime: 60000, // Cache for 1 minute
+  });
 }
 
 /**

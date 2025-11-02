@@ -8,6 +8,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// --- API Endpoints ---
+
+// 1. Get a list of all available dashboards
+app.get('/api/dashboards', (req, res) => {
+  console.log('GET /api/dashboards - Fetching dashboard list');
+  const dashboardList = Object.values(dashboards).map(d => ({
+    id: d.id,
+    title: d.title,
+    description: d.meta?.description || `${d.layout.length} widgets`,
+  }));
+  res.json(dashboardList);
+});
+
 // Mock dashboard configurations
 const dashboards = {
   'infra-overview': {

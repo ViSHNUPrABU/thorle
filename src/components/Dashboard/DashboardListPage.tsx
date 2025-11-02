@@ -1,9 +1,21 @@
 // src/components/Dashboard/DashboardListPage.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { appConfig } from '../../configs/dashboards';
+import { useDashboardList } from '../../services/apiService';
+import { Loading } from '../common/Loading';
+import { ErrorDisplay } from '../common/Error';
 
 export const DashboardListPage: React.FC = () => {
+  const { data: dashboards, isLoading, isError, error } = useDashboardList();
+
+  if (isLoading) {
+    return <Loading message="Loading dashboards..." />;
+  }
+
+  if (isError) {
+    return <ErrorDisplay message={`Failed to load dashboards: ${error.message}`} />;
+  }
+
   return (
     <div style={{ 
       padding: '2rem',
@@ -19,7 +31,7 @@ export const DashboardListPage: React.FC = () => {
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
         gap: '1.5rem',
       }}>
-        {appConfig.dashboards.map(dashboard => (
+        {dashboards?.map(dashboard => (
           <Link
             key={dashboard.id}
             to={`/dash/${dashboard.id}`}
@@ -54,7 +66,7 @@ export const DashboardListPage: React.FC = () => {
               fontSize: '0.875rem', 
               color: '#666',
             }}>
-              {dashboard.layout.length} widgets
+              {dashboard.description}
             </p>
           </Link>
         ))}

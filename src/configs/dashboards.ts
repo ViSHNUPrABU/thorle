@@ -2,51 +2,58 @@
 import type { AppConfig } from '../types/config';
 
 export const appConfig: AppConfig = {
-  layout: {
+  nav: [
+    { id: 'dashboards', label: 'Dashboards' },
+  ],
+  navLayout: {
     direction: 'column',
-    style: { height: '100vh', width: '100vw', background: '#f0f2f5' },
+    style: { height: '100vh', width: '100%' },
     children: [
-      // Top Navbar
+      // Top navbar - fixed height
       {
         height: '60px',
         direction: 'row',
         style: {
-          background: 'white',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          background: '#1e1e1e',
+          color: 'white',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           alignItems: 'center',
-          padding: '0 24px',
+          padding: '0 1.5rem',
         },
         children: [
-          { component: 'AppTitle' },
-          // Can add NavMenu component here in the future
+          {
+            component: 'AppTitle',
+            width: '10%', // Take 10% of navbar width
+          },
+          // NavMenu takes remaining 90% automatically
         ],
       },
-      // Main Content
+      // Main content area - takes remaining height
       {
         direction: 'row',
+        style: { overflow: 'hidden' },
         children: [
-          // Sidebar
+          // Left sidebar - fixed width
           {
-            width: '240px',
+            width: '200px',
             direction: 'column',
             style: {
-              background: 'white',
-              borderRight: '1px solid #f0f0f0',
-              padding: '16px 0',
+              background: '#f5f5f5',
+              borderRight: '1px solid #e0e0e0',
+              padding: '1rem 0',
             },
             children: [
               {
                 component: 'SidebarNavItem',
-                props: {
+                props: { 
                   itemId: 'dashboards',
                   label: 'Dashboards',
                   path: '/dashboards',
                 },
               },
-              // Add more SidebarNavItems here
             ],
           },
-          // Content Area
+          // Right content area - takes remaining width automatically
           {
             component: 'ContentArea',
             props: {
@@ -61,4 +68,8 @@ export const appConfig: AppConfig = {
       },
     ],
   },
+  dashboards: [
+    // Dashboard configs are now fetched from the API
+    // This can be kept for fallback or removed
+  ],
 };

@@ -122,7 +122,11 @@ export type NavItemConfig = {
 export type NavItem = NavItemConfig;
 
 export type AppConfig = {
-  layout: StaticLayoutConfig;
+  nav: NavItemConfig[];
+  navLayout?: StaticLayoutConfig; // Optional: Full navbar layout config
+  dashboards: DashboardLayoutConfig[];
+  // API endpoint to fetch dashboards from (optional)
+  dashboardsApiUrl?: string;
 };
 
 // API Response type for dashboard config fetch

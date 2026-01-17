@@ -53,43 +53,75 @@ export type DataWidgetConfig = BaseWidgetConfig & {
 
 export type WidgetConfig = ChartWidgetConfig | TableWidgetConfig | DataWidgetConfig;
 
-// Static Layout types for non-grid layouts
-export type LayoutDirection = "row" | "column";
+// Layout types
+export type LayoutType = 'flex-row' | 'flex-col';
+export type LayoutDirection = "row" | "column"; // Legacy support
 
-export type StaticLayoutItem = {
-  // Type can be inferred from presence of properties (D3-like structure)
-  // No ID required - structure is implicit
-  
-  // Widget type - has widgetConfig
-  widgetConfig?: WidgetConfig;
-  
-  // Layout type - has direction and children
-  direction?: LayoutDirection;
-  children?: StaticLayoutItem[];
-  
-  // Component type - has component name
-  component?: string;
-  props?: Record<string, any>;
-  
-  // Size properties - more flexible
-  // Can use: "200px", "20%", "10rem", or omit for flex
-  width?: string | number;  // number = pixels, string = CSS value
-  height?: string | number; // number = pixels, string = CSS value
-  
-  // Flex only used when width/height not specified
-  // Omit flex to auto-calculate remaining space
+// LayoutBuilder types - new flexible layout system
+export type LayoutItem = {
+  // Component rendering
+  component?: string | React.ComponentType<any>;
+  componentProps?: Record<string, any>;
+
+  // Nested layout
+  layoutType?: LayoutType;
+  children?: LayoutItem[];
+
+  // Size properties
+  width?: string;
+  height?: string;
   flex?: number;
-  
+  gap?: string;
+
+  // Data fetching
+  dataSource?: ApiDataSource;
+
+  // Conditional rendering
+  visibility?: VisibilityRule[];
+
   // Styling
   style?: React.CSSProperties;
-  
-  // Conditional rendering
+};
+
+export type LayoutBuilderConfig = {
+  layoutType: LayoutType;
+  children: LayoutItem[];
+  width?: string;
+  height?: string;
+  gap?: string;
+  style?: React.CSSProperties;
+};
+
+// ComponentWrapper props type
+export type ComponentWrapperProps = {
+  component: React.ComponentType<any> | string;
+  componentProps?: Record<string, any>;
+  dataSource?: ApiDataSource;
+  visibility?: VisibilityRule[];
+  cacheTTL?: number;
+  renderLoading?: () => React.ReactNode;
+  renderError?: (error: Error, retry: () => void) => React.ReactNode;
+  renderEmpty?: () => React.ReactNode;
+  children?: React.ReactNode;
+};
+
+// Legacy StaticLayout types (for backward compatibility)
+export type StaticLayoutItem = {
+  widgetConfig?: WidgetConfig;
+  direction?: LayoutDirection;
+  children?: StaticLayoutItem[];
+  component?: string;
+  props?: Record<string, any>;
+  width?: string | number;
+  height?: string | number;
+  flex?: number;
+  style?: React.CSSProperties;
   visibility?: VisibilityRule[];
 };
 
 export type StaticLayoutConfig = {
   direction: LayoutDirection;
-  children: StaticLayoutItem[]; // Renamed from 'items' to 'children' for D3-like structure
+  children: StaticLayoutItem[];
   width?: string | number;
   height?: string | number;
   style?: React.CSSProperties;

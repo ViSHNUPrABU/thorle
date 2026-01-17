@@ -1,229 +1,109 @@
-# Monithor - API-Driven Observability Dashboard
+# Monithor
 
-A production-ready, 100% API-driven observability dashboard built with React, TypeScript, and Vite. Every dashboard is rendered entirely from API-provided configuration, with routes tightly coupled to backend endpoints.
+A powerful, **config-driven observability dashboard** framework for building dynamic monitoring interfaces. Create dashboards entirely from backend API responses - no frontend redeployment needed.
 
-## 🚀 Key Feature: Fully API-Driven
+## ✨ Features
 
-**Each route fetches its complete configuration from your API!**
+- 🎨 **Config-Driven UI** - Define dashboards via JSON/API
+- 🔄 **Real-Time Updates** - Widget-level polling with react-query
+- 📊 **Multiple Widget Types** - Charts (ECharts), Tables (Mantine), Stats/KPIs
+- 🎯 **Flexible Layouts** - Grid-based (drag & drop) or FlexBox (LayoutBuilder)
+- 🧩 **Component Registry** - Dynamic component resolution from config
+- 📦 **Universal Wrapper** - Automatic data fetching, loading, error handling
+- 🔍 **Visibility Rules** - Conditional widget rendering
+- 💾 **Smart Caching** - Per-widget TTL, localStorage persistence
+- 🎭 **Hybrid State** - Router loaders + react-query + Zustand
+- 🚀 **TypeScript** - Full type safety
 
-- Navigate to `/dash/my-dashboard`
-- App calls `GET /api/dashboards/my-dashboard`
-- Entire UI renders from the API response
-- No frontend changes needed to add/modify dashboards
+## 🏗️ Architecture
 
-## Features
+```
+┌─────────────────────────────────────────────┐
+│              React Router                    │
+│  (Initial Config Loading via Loaders)       │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│           ComponentWrapper                   │
+│  (Data Fetching, Loading, Error, Empty)     │
+└─────────────────────────────────────────────┘
+                    ↓
+        ┌───────────┴───────────┐
+        ↓                       ↓
+┌───────────────┐      ┌───────────────┐
+│ DashboardGrid │      │ LayoutBuilder │
+│ (Drag & Drop) │      │ (FlexBox)     │
+└───────────────┘      └───────────────┘
+        ↓                       ↓
+┌─────────────────────────────────────┐
+│  Chart  │  Table  │  Data Widgets   │
+└─────────────────────────────────────┘
+```
 
-- **100% API-Driven**: Dashboards, widgets, layouts, and data sources all come from API
-- **Tightly Coupled Routes**: Each route (`/dash/:id`) maps to an API endpoint
-- **Drag & Resize**: Interactive dashboard layout with react-grid-layout, with persistence to localStorage
-- **Real-time Data**: Automatic polling, caching, and retry logic with react-query
-- **Multiple Widget Types**:
-  - **ChartWidget**: Line, Bar, Area, Gauge, and custom ECharts visualizations
-  - **TableWidget**: Sortable tables with client-side sorting
-  - **DataWidget**: Stat, KPI, and List layouts for displaying metrics
-- **Dynamic Updates**: Change dashboards without redeploying frontend
-- **Global State Management**: Cross-widget context sharing with Zustand
-- **URL Templating**: Dynamic API endpoints with context interpolation
-- **Config Validation**: Runtime schema validation with ajv
-- **Lazy Loading**: Code-splitting for heavy libraries (echarts, mantine)
-- **TypeScript**: Full type safety across the application
+## 🚀 Quick Start
 
-## Tech Stack
-
-### Core
-- React 19
-- TypeScript
-- Vite
-
-### State & Data
-- `@tanstack/react-query` - Data fetching, caching, polling
-- `axios` - HTTP client
-- `zustand` - Global state management
-
-### UI & Layout
-- `react-grid-layout` - Draggable/resizable grid
-- `echarts` + `echarts-for-react` - Charts
-- `mantine-react-table` - Advanced tables (optional)
-- `react-router-dom` - Routing
-
-### Validation
-- `ajv` - JSON schema validation
-
-## Quick Start
-
-### 1. Installation
+### 1. Install
 
 ```bash
 npm install
-npm install express cors  # For mock server
-npm install -D concurrently  # Optional: run both servers together
 ```
 
-### 2. Start Development Environment
+### 2. Start Mock API
 
 ```bash
-# Option 1: Start both servers together
-npm run dev:full
-
-# Option 2: Start separately
-# Terminal 1:
 npm run mock-api
-
-# Terminal 2:
-npm run dev
 ```
 
-### 3. Access Dashboards
-
-Navigate to:
-- http://localhost:5173/dash/infra-overview
-- http://localhost:5173/dash/app-metrics
-
-**That's it!** The dashboards render entirely from API configs.
-
-## 📖 Documentation
-
-- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Detailed setup and customization guide
-- **[API_DRIVEN_DASHBOARD.md](./API_DRIVEN_DASHBOARD.md)** - Architecture and API documentation
-- **[API_IMPLEMENTATION_SUMMARY.md](./API_IMPLEMENTATION_SUMMARY.md)** - What changed and why
-- **[EXAMPLE_API_RESPONSE.md](./EXAMPLE_API_RESPONSE.md)** - Complete API response examples
-
-## How It Works
-
-```
-User visits: /dash/infra-overview
-       ↓
-Dashboard extracts: dashboardId = "infra-overview"
-       ↓
-API call: GET /api/dashboards/infra-overview
-       ↓
-API returns complete config with all widgets
-       ↓
-UI renders entirely from config
-```
-
-## API Endpoint
-
-Your backend must implement:
-
-```
-GET /api/dashboards/:dashboardId
-```
-
-Response:
-```json
-{
-  "id": "infra-overview",
-  "title": "Infrastructure Overview",
-  "layout": [
-    {
-      "id": "cpu-chart",
-      "type": "chart",
-      "chartType": "line",
-      "position": { "x": 0, "y": 0, "w": 6, "h": 4 },
-      "echartsOption": { /* ... */ }
-    }
-  ]
-}
-```
-
-See [EXAMPLE_API_RESPONSE.md](./EXAMPLE_API_RESPONSE.md) for complete examples.
-
-## Development
-
-### Mock Server
-
-A complete mock API server is included:
-
-```bash
-node mock-api-server.js
-```
-
-Provides:
-- Dashboard config endpoints
-- Widget data endpoints
-- Example dashboards
-
-### Creating a New Dashboard
-
-Simply add to `mock-api-server.js`:
-
-```javascript
-const dashboards = {
-  'my-dashboard': {
-    id: 'my-dashboard',
-    title: 'My Dashboard',
-    layout: [/* widget configs */]
-  }
-};
-```
-
-Access at: `/dash/my-dashboard` - No frontend changes needed!
-
-### Development
+### 3. Start Dev Server
 
 ```bash
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
-
-### Build
+Or run both together:
 
 ```bash
-npm run build
+npm run dev:full
 ```
 
-### Preview Production Build
+### 4. Open Browser
 
-```bash
-npm run preview
-```
+Visit http://localhost:5173
 
-## Project Structure
+**Available Pages:**
+- `/dashboards` - Dashboard list
+- `/dashboards/infra-overview` - Infrastructure metrics
+- `/dashboards/app-metrics` - Application metrics
+- `/database` - MySQL database monitoring
+
+## 📁 Project Structure
 
 ```
 src/
-  types/
-    config.ts           # TypeScript type definitions
-  services/
-    apiService.ts       # react-query + axios integration
-    contextService.ts   # Zustand store
-    validation.ts       # ajv schema validation
-  utils/
-    templating.ts       # URL template interpolation
-    visibility.ts       # Visibility rule evaluation
-  components/
-    common/
-      Loading.tsx       # Loading state
-      Empty.tsx         # Empty state
-      Error.tsx         # Error state
-    NavBar/
-      NavBar.tsx        # Top navigation
-      Sidebar.tsx       # Left sidebar
-    Dashboard/
-      Dashboard.tsx     # Main dashboard container
-    Widget/
-      WidgetWrapper.tsx # Widget data fetching & rendering
-      ChartWidget.tsx   # Chart visualizations
-      TableWidget.tsx   # Table widget
-      DataWidget.tsx    # Data display widget
-  configs/
-    dashboards.ts       # Dashboard configurations
-  router/
-    routes.tsx          # React Router configuration
-  App.tsx              # Main app component
-  main.tsx             # Entry point
+├── pages/              # Feature pages (Dashboards, Database)
+├── components/         # Reusable components
+│   ├── Chart.tsx
+│   ├── Table.tsx
+│   ├── Data.tsx
+│   ├── DashboardGrid.tsx
+│   ├── LayoutBuilder.tsx
+│   ├── ComponentWrapper.tsx
+│   └── common/
+├── routes/             # Route configuration
+├── services/           # API, registry, context
+├── configs/            # Static configurations
+├── utils/              # Utility functions
+└── types/              # TypeScript types
 ```
 
-## Configuration Guide
+## 📊 Creating Dashboards
 
-### Creating a Dashboard
+### API-Driven (Recommended)
 
-Dashboards are defined in `src/configs/dashboards.ts`. Example:
+Add to `mock-api-server.cjs`:
 
-```typescript
-{
+```javascript
+dashboards['my-dashboard'] = {
   id: 'my-dashboard',
   title: 'My Dashboard',
   layout: [
@@ -232,41 +112,183 @@ Dashboards are defined in `src/configs/dashboards.ts`. Example:
       type: 'chart',
       title: 'CPU Usage',
       position: { x: 0, y: 0, w: 6, h: 4 },
-      dataSource: {
-        url: '/api/metrics/cpu',
-        method: 'GET',
-        polling: { intervalMs: 15000 },
-      },
       chartType: 'line',
+      dataSource: {
+        url: 'http://localhost:3001/api/metrics/cpu',
+        polling: { intervalMs: 5000 }
+      },
+      echartsOption: {
+        xAxis: { type: 'category', data: ['Mon', 'Tue', 'Wed'] },
+        yAxis: { type: 'value' },
+        series: [{ data: [45, 52, 48], type: 'line' }]
+      }
+    }
+  ]
+};
+```
+
+Navigate to `/dashboards/my-dashboard` - done! ✨
+
+### Using LayoutBuilder
+
+For flexible layouts without grid positioning:
+
+```typescript
+const config = {
+  layoutType: 'flex-row',
+  gap: '1rem',
+  children: [
+    {
+      component: 'Data',
+      componentProps: {
+        data: { value: 42 },
+        layout: 'stat',
+        fields: [{ key: 'value', label: 'Active Users' }]
+      }
     },
-  ],
+    {
+      component: 'Chart',
+      componentProps: {
+        chartType: 'line',
+        data: [...]
+      }
+    }
+  ]
+};
+
+<LayoutBuilder config={config} />
+```
+
+## 🔧 Widget Types
+
+### Chart Widget
+
+```typescript
+{
+  type: 'chart',
+  chartType: 'line' | 'bar' | 'area' | 'gauge',
+  echartsOption: { /* ECharts configuration */ }
 }
 ```
 
-### Widget Types
+### Table Widget
 
-#### ChartWidget
-```typescript
-{ type: 'chart', chartType: 'line'|'bar'|'area'|'gauge' }
-```
-
-#### TableWidget
 ```typescript
 {
   type: 'table',
-  columns: [{ id: 'name', label: 'Name', sortable: true }]
+  columns: [
+    { id: 'name', label: 'Name', sortable: true },
+    { id: 'status', label: 'Status' }
+  ]
 }
 ```
 
-#### DataWidget
+### Data Widget
+
 ```typescript
 {
   type: 'data',
-  layout: 'stat'|'kpi'|'list',
-  fields: [{ key: 'uptime', format: 'number' }]
+  layout: 'stat' | 'kpi' | 'list',
+  fields: [
+    { key: 'value', label: 'Total', format: 'number' }
+  ]
 }
 ```
 
-## License
+## 🎯 Key Components
+
+### ComponentWrapper
+
+Universal wrapper for any component with built-in:
+- Data fetching (react-query)
+- Loading/error/empty states
+- Visibility rules
+- Cache management
+
+```tsx
+<ComponentWrapper
+  component={MyComponent}
+  dataSource={{ url: '/api/data', polling: { intervalMs: 5000 } }}
+  renderLoading={() => <CustomLoader />}
+/>
+```
+
+### LayoutBuilder
+
+Flexible layout system:
+
+```tsx
+<LayoutBuilder
+  config={{
+    layoutType: 'flex-col',
+    gap: '1rem',
+    children: [/* layout items */]
+  }}
+/>
+```
+
+### DashboardGrid
+
+Grid-based dashboard with drag & drop:
+
+```tsx
+<DashboardGrid
+  config={{
+    id: 'my-dashboard',
+    title: 'My Dashboard',
+    layout: [/* widgets */]
+  }}
+/>
+```
+
+## 🔄 State Management
+
+**Router Loaders** → Initial page data  
+**React Query** → Widget data with polling/caching  
+**Zustand** → Cross-widget state sharing
+
+## 🛠️ Tech Stack
+
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **React Router 7** - Routing with loaders
+- **TanStack Query** - Data fetching
+- **Zustand** - State management
+- **ECharts** - Charting library
+- **Mantine** - UI components
+- **react-grid-layout** - Drag & drop grids
+
+## 📚 Documentation
+
+- [Quick Start Guide](./QUICK_START.md) - Detailed setup and usage
+- [Refactoring Summary](./REFACTORING_SUMMARY.md) - Architecture details
+
+## 🧪 Testing
+
+```bash
+# Type check
+npx tsc --noEmit
+
+# Lint
+npm run lint
+
+# Build
+npm run build
+```
+
+## 🤝 Contributing
+
+1. Follow the folder structure
+2. Use ComponentWrapper for data-fetching components
+3. Register new components in App.tsx
+4. Add loaders for new pages
+5. Keep components pure (no data fetching logic)
+
+## 📄 License
 
 MIT
+
+---
+
+**Built with ❤️ for modern observability**

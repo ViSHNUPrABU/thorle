@@ -1,25 +1,36 @@
-// src/components/Widget/DataWidget.tsx
+// src/components/Data.tsx
 import React from 'react';
-import type { DataWidgetConfig } from '../../types/config';
 
-interface DataWidgetProps {
-  config: DataWidgetConfig;
-  data: any;
+interface DataField {
+  key: string;
+  label?: string;
+  format?: string;
 }
 
-export const DataWidget: React.FC<DataWidgetProps> = ({ config, data }) => {
-  if (config.layout === 'stat') {
-    return <StatLayout config={config} data={data} />;
+interface DataProps {
+  data: any;
+  layout: 'stat' | 'list' | 'kpi';
+  fields: DataField[];
+}
+
+export const Data: React.FC<DataProps> = ({ data, layout, fields }) => {
+  if (layout === 'stat') {
+    return <StatLayout data={data} fields={fields} />;
   }
-  
-  if (config.layout === 'kpi') {
-    return <KPILayout config={config} data={data} />;
+
+  if (layout === 'kpi') {
+    return <KPILayout data={data} fields={fields} />;
   }
-  
-  return <ListLayout config={config} data={data} />;
+
+  return <ListLayout data={data} fields={fields} />;
 };
 
-const StatLayout: React.FC<DataWidgetProps> = ({ config, data }) => {
+interface LayoutProps {
+  data: any;
+  fields: DataField[];
+}
+
+const StatLayout: React.FC<LayoutProps> = ({ data, fields }) => {
   return (
     <div style={{
       display: 'flex',
@@ -30,10 +41,10 @@ const StatLayout: React.FC<DataWidgetProps> = ({ config, data }) => {
       alignItems: 'center',
       justifyContent: 'space-around',
     }}>
-      {config.fields.map(field => {
+      {fields.map(field => {
         const value = data?.[field.key];
         return (
-          <div 
+          <div
             key={field.key}
             style={{
               textAlign: 'center',
@@ -63,7 +74,7 @@ const StatLayout: React.FC<DataWidgetProps> = ({ config, data }) => {
   );
 };
 
-const KPILayout: React.FC<DataWidgetProps> = ({ config, data }) => {
+const KPILayout: React.FC<LayoutProps> = ({ data, fields }) => {
   return (
     <div style={{
       display: 'grid',
@@ -71,10 +82,10 @@ const KPILayout: React.FC<DataWidgetProps> = ({ config, data }) => {
       gap: '1rem',
       padding: '1rem',
     }}>
-      {config.fields.map(field => {
+      {fields.map(field => {
         const value = data?.[field.key];
         return (
-          <div 
+          <div
             key={field.key}
             style={{
               background: '#f5f5f5',
@@ -106,7 +117,7 @@ const KPILayout: React.FC<DataWidgetProps> = ({ config, data }) => {
   );
 };
 
-const ListLayout: React.FC<DataWidgetProps> = ({ config, data }) => {
+const ListLayout: React.FC<LayoutProps> = ({ data, fields }) => {
   return (
     <div style={{
       padding: '1rem',
@@ -117,7 +128,7 @@ const ListLayout: React.FC<DataWidgetProps> = ({ config, data }) => {
         gridTemplateColumns: 'auto 1fr',
         gap: '0.75rem 1.5rem',
       }}>
-        {config.fields.map(field => {
+        {fields.map(field => {
           const value = data?.[field.key];
           return (
             <React.Fragment key={field.key}>
@@ -147,11 +158,11 @@ function formatValue(value: any, format?: string): string {
   if (value === null || value === undefined) {
     return 'N/A';
   }
-  
+
   if (format === 'percent') {
     return `${Number(value).toFixed(2)}%`;
   }
-  
+
   if (format === 'bytes') {
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let size = Number(value);
@@ -162,10 +173,14 @@ function formatValue(value: any, format?: string): string {
     }
     return `${size.toFixed(2)} ${units[unitIndex]}`;
   }
-  
+
   if (format === 'number') {
     return Number(value).toLocaleString();
   }
-  
+
+  if (format && format.includes('{value}')) {
+    return format.replace('{value}', String(value));
+  }
+
   return String(value);
 }

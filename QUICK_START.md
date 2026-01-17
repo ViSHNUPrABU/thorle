@@ -1,255 +1,405 @@
-# Quick Start Guide: Config-Driven UI
+# Monithor - Quick Start Guide
 
-## 🚀 Getting Started in 5 Minutes
+## What is Monithor?
 
-### 1. Understanding the System
+Monithor is a **config-driven observability dashboard** framework that renders monitoring UIs entirely from backend API responses. The frontend is 100% dynamic - add/modify dashboards without redeploying.
 
-Your entire UI is now defined in **`src/configs/dashboards.ts`**. No code changes needed to modify layouts!
+## Architecture
 
-### 2. Basic Structure
+### Folder Structure
 
-```typescript
-export const appConfig: AppConfig = {
-  nav: [/* navigation items */],
-  navLayout: {/* how the app is laid out */},
-  dashboards: [/* dashboard definitions */]
-}
+```
+src/
+├── pages/              # Feature pages (Dashboards, Database)
+├── components/         # Base reusable components
+├── routes/             # Route configuration
+├── configs/            # Static configs
+├── services/           # API, registry, context services
+├── utils/              # Utilities
+└── types/              # TypeScript types
 ```
 
-### 3. Try It Out
+### Key Components
 
-**Change the sidebar to the right:**
+1. **ComponentWrapper** - Universal wrapper for all components
+   - Handles data fetching, loading/error/empty states
+   - Supports visibility rules and caching
 
-In `src/configs/dashboards.ts`, find this section:
+2. **LayoutBuilder** - Flexible layout system
+   - `layoutType: 'flex-row' | 'flex-col'`
+   - Equal width distribution for children
+
+3. **DashboardGrid** - react-grid-layout wrapper
+   - Drag & drop, resize widgets
+   - LocalStorage persistence
+
+4. **Chart, Table, Data** - Pure presentation components
+   - Chart: ECharts integration
+   - Table: Mantine React Table
+   - Data: Stat/KPI/List layouts
+
+## Getting Started
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Start Mock API Server
+
+```bash
+npm run mock-api
+```
+
+This starts a mock API server on `http://localhost:3001` with endpoints:
+- `GET /api/dashboards` - List dashboards
+- `GET /api/dashboards/:id` - Get dashboard config
+- `GET /api/database/metrics` - Get MySQL metrics
+
+### 3. Start Development Server
+
+In a separate terminal:
+
+```bash
+npm run dev
+```
+
+Or run both together:
+
+```bash
+npm run dev:full
+```
+
+### 4. Access the Application
+
+Open http://localhost:5173
+
+**Available Pages:**
+- `/dashboards` - Dashboard list
+- `/dashboards/infra-overview` - Infrastructure dashboard
+- `/dashboards/app-metrics` - Application metrics
+- `/database` - MySQL database monitoring
+
+## Creating a New Dashboard
+
+### Option 1: Static Configuration
+
+Edit `src/configs/dashboards.ts`:
+
 ```typescript
-// Left sidebar
 {
-  type: 'layout',
-  width: '200px',  // ← Try changing this
-  direction: 'column',
-  // ...
-}
-```
-
-Change it to be on the right by reordering the children array.
-
-### 4. Add Widgets to Navbar
-
-Add this to the navbar items array:
-```typescript
-{
-  type: 'widget',
-  width: '120px',
-  widgetConfig: {
-    id: 'navbar-stat',
-    type: 'data',
-    layout: 'stat',
-    fields: [{ key: 'userId', label: 'CPU' }],
-    dataSource: {
-      url: 'https://jsonplaceholder.typicode.com/posts/1',
-      polling: { intervalMs: 5000 }
-    }
-  }
-}
-```
-
-### 5. Change Layout Direction
-
-Switch from vertical to horizontal:
-```typescript
-navLayout: {
-  direction: 'row',  // ← Change from 'column' to 'row'
-  // ...
-}
-```
-
-### 6. Add a New Dashboard
-
-In the `dashboards` array:
-```typescript
-{
-  id: 'my-new-dashboard',
-  title: 'My New Dashboard',
+  id: 'my-dashboard',
+  title: 'My Dashboard',
   layout: [
     {
-      id: 'my-widget',
+      id: 'widget-1',
       type: 'chart',
       title: 'My Chart',
       position: { x: 0, y: 0, w: 6, h: 4 },
+      dataSource: {
+        url: 'http://localhost:3001/api/metrics/cpu',
+        method: 'GET',
+        polling: { intervalMs: 15000 },
+      },
       chartType: 'line',
-      echartsOption: {
-        xAxis: { type: 'category', data: ['A', 'B', 'C'] },
-        yAxis: { type: 'value' },
-        series: [{ data: [10, 20, 30], type: 'line' }]
-      }
+      echartsOption: { /* ECharts config */ }
     }
   ]
 }
 ```
 
-Then navigate to `/dash/my-new-dashboard` to see it!
+### Option 2: API-Driven (Recommended)
 
-### 7. Try Advanced Examples
+1. Add endpoint to `mock-api-server.cjs`:
 
-Copy configs from `src/configs/advancedExample.ts` into `dashboards.ts`:
-
-```typescript
-// Replace navLayout with an example
-import { navbarWithWidgets } from './advancedExample';
-
-export const appConfig: AppConfig = {
-  ...navbarWithWidgets,
-  dashboards: [ /* your dashboards */ ]
+```javascript
+dashboards['my-dashboard'] = {
+  id: 'my-dashboard',
+  title: 'My Dashboard',
+  layout: [
+    // Widget configs
+  ]
 };
 ```
 
-### 8. Create Custom Components
+2. Navigate to `/dashboards/my-dashboard`
+
+The frontend automatically fetches the config from the API!
+
+## Using LayoutBuilder
+
+Create flexible layouts without grid positioning:
 
 ```typescript
-// 1. Create component
-const MyWidget = () => <div>Hello!</div>;
+import { LayoutBuilder } from './components/LayoutBuilder';
 
-// 2. Register it (in App.tsx)
-registerComponent('MyWidget', MyWidget);
-
-// 3. Use in config
-{
-  type: 'component',
-  component: 'MyWidget'
-}
-```
-
-## 📋 Cheat Sheet
-
-### Layout Types
-
-| Type | Use For | Example |
-|------|---------|---------|
-| `layout` | Container for other items | Navbar, sidebar, sections |
-| `widget` | Data visualization | Charts, tables, KPIs |
-| `component` | Custom React component | Logo, menu, custom UI |
-
-### Common Patterns
-
-**Fixed Navbar:**
-```typescript
-{
-  type: 'layout',
-  height: '60px',
-  direction: 'row',
-  children: [/* navbar items */]
-}
-```
-
-**Sidebar:**
-```typescript
-{
-  type: 'layout',
-  width: '200px',
-  direction: 'column',
-  children: [/* sidebar items */]
-}
-```
-
-**Flex Content:**
-```typescript
-{
-  type: 'component',
-  component: 'ContentArea',
-  flex: 1  // Takes remaining space
-}
-```
-
-**Equal Split:**
-```typescript
-{
-  direction: 'row',
+const config = {
+  layoutType: 'flex-col',
+  gap: '1rem',
   children: [
-    { type: 'component', component: 'A', flex: 1 },
-    { type: 'component', component: 'B', flex: 1 }
+    {
+      layoutType: 'flex-row',
+      gap: '1rem',
+      children: [
+        {
+          component: 'Data',
+          componentProps: {
+            data: { value: 42 },
+            layout: 'stat',
+            fields: [{ key: 'value', label: 'Connections' }]
+          }
+        },
+        {
+          component: 'Data',
+          componentProps: {
+            data: { value: 1250 },
+            layout: 'stat',
+            fields: [{ key: 'value', label: 'QPS' }]
+          }
+        }
+      ]
+    },
+    {
+      component: 'Chart',
+      componentProps: {
+        data: [...],
+        chartType: 'line'
+      }
+    }
   ]
-}
+};
+
+<LayoutBuilder config={config} />
 ```
 
-**2/3 - 1/3 Split:**
+## Adding a New Page
+
+1. **Create page component** (`src/pages/MyFeature/MyPage.tsx`):
+
+```typescript
+import { useLoaderData } from 'react-router-dom';
+
+export const MyPage = () => {
+  const data = useLoaderData();
+  return <div>{/* Your UI */}</div>;
+};
+```
+
+2. **Add loader** (`src/services/apiService.ts`):
+
+```typescript
+export const myPageLoader = async () => {
+  const response = await axios.get('/api/my-data');
+  return response.data;
+};
+```
+
+3. **Add route** (`src/router/routes.tsx`):
+
 ```typescript
 {
-  direction: 'row',
-  children: [
-    { type: 'component', component: 'A', flex: 2 },
-    { type: 'component', component: 'B', flex: 1 }
-  ]
+  path: '/my-feature',
+  element: <MyPage />,
+  loader: myPageLoader,
 }
 ```
 
-## 🎨 Styling
+4. **Register component** (`src/App.tsx`):
 
-Add inline styles to any item:
+```typescript
+import { MyPage } from './pages/MyFeature/MyPage';
+
+registerBatch({
+  // ...existing
+  MyPage,
+});
+```
+
+5. **Add navigation** (`src/App.tsx`):
+
+```typescript
+<NavBar items={[
+  // ...existing
+  { id: 'my-feature', label: 'My Feature', route: '/my-feature' },
+]} />
+```
+
+## Widget Types
+
+### Chart Widget
+
 ```typescript
 {
-  type: 'layout',
-  direction: 'row',
-  style: {
-    background: '#1e1e1e',
-    color: 'white',
-    padding: '1rem',
-    gap: '1rem',
-    borderRadius: '8px'
-  }
+  type: 'chart',
+  chartType: 'line' | 'bar' | 'area' | 'gauge',
+  echartsOption: { /* ECharts config */ },
+  dataSource: { url: '/api/data' }
 }
 ```
 
-## 🔍 Debugging
+### Table Widget
 
-### Item not showing?
-- Check `visibility` rules
-- Check `width`/`height` - might be 0
-- Check `flex` value
-- Check parent layout direction
-
-### Component not found?
 ```typescript
-// Make sure it's registered
-registerComponent('MyComponent', MyComponent);
+{
+  type: 'table',
+  columns: [
+    { id: 'name', label: 'Name', sortable: true },
+    { id: 'value', label: 'Value' }
+  ],
+  dataSource: { url: '/api/table-data' }
+}
 ```
 
-### Widget not rendering?
-- Check widget `type` is valid
-- Check `dataSource.url` is accessible
-- Check browser console for errors
+### Data Widget
 
-## 📚 Next Steps
+```typescript
+{
+  type: 'data',
+  layout: 'stat' | 'kpi' | 'list',
+  fields: [
+    { key: 'value', label: 'Total', format: 'number' }
+  ],
+  dataSource: { url: '/api/stats' }
+}
+```
 
-1. Read `CONFIG_DRIVEN_UI.md` for architecture details
-2. Browse `CONFIG_EXAMPLES.md` for 10 practical examples
-3. Check `IMPLEMENTATION_SUMMARY_CONFIG_UI.md` for technical details
-4. Experiment with `src/configs/advancedExample.ts`
+## State Management
 
-## 🆘 Common Questions
+### Router Loaders (Initial Data)
 
-**Q: Can I nest layouts?**  
-A: Yes! Infinite nesting is supported.
+```typescript
+// Fetched once when route loads
+export const dashboardLoader = async ({ params }) => {
+  return fetchDashboardConfig(params.id);
+};
+```
 
-**Q: Can I mix static and grid layouts?**  
-A: Yes! Use StaticLayout for app structure, DashboardLayout for dashboards.
+### React-Query (Widget Data)
 
-**Q: Can I load config from API?**  
-A: Yes! Use `loadAppConfigWithFallback` from `utils/configLoader.ts`
+```typescript
+// Used by ComponentWrapper
+// Supports polling, caching, refetching
+<ComponentWrapper
+  component={Chart}
+  dataSource={{ 
+    url: '/api/metrics',
+    polling: { intervalMs: 5000 }
+  }}
+/>
+```
 
-**Q: Can I use context/visibility rules?**  
-A: Yes! Add `visibility` array to any item.
+### Zustand (Cross-Widget State)
 
-**Q: Can widgets poll for updates?**  
-A: Yes! Add `polling: { intervalMs: 5000 }` to `dataSource`
+```typescript
+// Share state between widgets
+import { useContextStore } from './services/contextService';
 
-## 🎯 Pro Tips
+const setFilter = useContextStore(state => state.setContext);
+setFilter('selectedRegion', 'us-east-1');
+```
 
-1. **Start simple** - Begin with basic layouts, add complexity gradually
-2. **Use flexbox** - Understand flex: 1 vs flex: 2 vs width: '200px'
-3. **Test responsive** - Check different screen sizes
-4. **Component registry** - Register reusable components once, use everywhere
-5. **Validation** - Use `validateAppConfig` before deploying configs
+## Data Fetching
 
----
+### With ComponentWrapper
 
-**Happy config-driven development! 🚀**
+```typescript
+<ComponentWrapper
+  component={MyComponent}
+  dataSource={{
+    url: '/api/data',
+    method: 'GET',
+    polling: { intervalMs: 10000 },
+    cacheTTL: 5000
+  }}
+  renderLoading={() => <div>Loading...</div>}
+  renderError={(error, retry) => (
+    <div>
+      Error: {error.message}
+      <button onClick={retry}>Retry</button>
+    </div>
+  )}
+/>
+```
+
+### Direct API Call
+
+```typescript
+import { fetchWidgetData } from './services/apiService';
+
+const data = await fetchWidgetData({
+  url: '/api/data',
+  method: 'GET'
+});
+```
+
+## Custom Components
+
+1. **Create component**:
+
+```typescript
+export const MyCustomComponent: React.FC<{ data: any }> = ({ data }) => {
+  return <div>{JSON.stringify(data)}</div>;
+};
+```
+
+2. **Register it**:
+
+```typescript
+registerComponent('MyCustomComponent', MyCustomComponent);
+```
+
+3. **Use in LayoutBuilder**:
+
+```typescript
+{
+  component: 'MyCustomComponent',
+  dataSource: { url: '/api/my-data' }
+}
+```
+
+## Best Practices
+
+1. **Use ComponentWrapper** for all data-fetching components
+2. **Use LayoutBuilder** for flexible layouts
+3. **Use DashboardGrid** when drag-and-drop is needed
+4. **Keep components pure** - no data fetching logic inside
+5. **Use loaders** for initial page data
+6. **Use react-query** for widget polling/caching
+7. **Register components** before using them in configs
+
+## Troubleshooting
+
+### Component not found error
+
+Register the component in `App.tsx`:
+
+```typescript
+registerBatch({ MyComponent });
+```
+
+### Data not loading
+
+Check:
+1. Mock API server is running (`npm run mock-api`)
+2. API endpoint exists in `mock-api-server.cjs`
+3. CORS is enabled (already configured)
+
+### TypeScript errors
+
+Run type check:
+
+```bash
+npx tsc --noEmit
+```
+
+## Resources
+
+- **ECharts Docs**: https://echarts.apache.org/en/option.html
+- **Mantine Table**: https://www.mantine-react-table.com/
+- **React Router**: https://reactrouter.com/
+- **React Query**: https://tanstack.com/query/latest
+
+## Support
+
+For issues or questions, check `REFACTORING_SUMMARY.md` for detailed architecture documentation.

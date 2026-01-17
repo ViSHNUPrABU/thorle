@@ -1,17 +1,20 @@
-// src/components/Layout/DashboardLayout.tsx
+// src/components/DashboardGrid.tsx
 import React, { useState, useCallback, useMemo } from 'react';
 import GridLayout from 'react-grid-layout';
 import type { Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import type { DashboardLayoutConfig } from '../../types/config';
-import { WidgetWrapper } from '../Widget/WidgetWrapper';
+import type { DashboardLayoutConfig, WidgetConfig } from '../types/config';
+import { ComponentWrapper } from './ComponentWrapper';
+import { Chart } from './Chart';
+import { Table } from './Table';
+import { Data } from './Data';
 
-interface DashboardLayoutProps {
+interface DashboardGridProps {
   config: DashboardLayoutConfig;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config }) => {
+export const DashboardGrid: React.FC<DashboardGridProps> = ({ config }) => {
   // Build initial layout from widget configs
   const initialLayout = useMemo(() => {
     return config.layout.map(widget => ({
@@ -24,9 +27,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config }) => {
       minH: widget.position?.minH || 2,
     }));
   }, [config.layout]);
-  
+
   const [layout, setLayout] = useState<Layout[]>(initialLayout);
-  
+
   // Load layout from localStorage
   React.useEffect(() => {
     const savedLayout = localStorage.getItem(`dashboard-layout-${config.id}`);
@@ -38,22 +41,58 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config }) => {
       }
     }
   }, [config.id]);
-  
+
   // Handle layout change
   const handleLayoutChange = useCallback((newLayout: Layout[]) => {
     setLayout(newLayout);
     localStorage.setItem(`dashboard-layout-${config.id}`, JSON.stringify(newLayout));
   }, [config.id]);
-  
+
+  // Render widget based on type
+  const renderWidget = (widgetConfig: WidgetConfig) => {
+    const widgetProps: any = {};
+
+    if (widgetConfig.type === 'chart') {
+      widgetProps.component = Chart;
+      widgetProps.componentProps = {
+        chartType: widgetConfig.chartType,
+        echartsOption: widgetConfig.echartsOption,
+        title: widgetConfig.title,
+      };
+    } else if (widgetConfig.type === 'table') {
+      widgetProps.component = Table;
+      widgetProps.componentProps = {
+        columns: widgetConfig.columns,
+        enablePagination: widgetConfig.pagination?.mode === 'client',
+        pageSize: widgetConfig.pagination?.pageSize || 10,
+      };
+    } else if (widgetConfig.type === 'data') {
+      widgetProps.component = Data;
+      widgetProps.componentProps = {
+        layout: widgetConfig.layout,
+        fields: widgetConfig.fields,
+      };
+    }
+
+    return (
+      <ComponentWrapper
+        {...widgetProps}
+        dataSource={widgetConfig.dataSource}
+        visibility={widgetConfig.visibility}
+        cacheTTL={widgetConfig.dataSource?.cacheTTL}
+      />
+    );
+  };
+
   return (
-    <div style={{ 
+    <div style={{
       padding: '1.5rem',
       background: '#fafafa',
       minHeight: '100%',
       height: '100%',
       overflow: 'auto',
     }}>
-      <div style={{ 
+      <div style={{
         marginBottom: '1.5rem',
         display: 'flex',
         justifyContent: 'space-between',
@@ -79,7 +118,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config }) => {
           Reset Layout
         </button>
       </div>
-      
+
       <GridLayout
         layout={layout}
         onLayoutChange={handleLayoutChange}
@@ -92,8 +131,31 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config }) => {
         containerPadding={[0, 0]}
       >
         {config.layout.map(widgetConfig => (
-          <div key={widgetConfig.id}>
-            <WidgetWrapper config={widgetConfig} />
+          <div
+            key={widgetConfig.id}
+            style={{
+              background: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {widgetConfig.title && (
+              <div style={{
+                padding: '1rem',
+                borderBottom: '1px solid #e0e0e0',
+                fontWeight: 600,
+                fontSize: '1rem',
+                color: '#333',
+              }}>
+                {widgetConfig.title}
+              </div>
+            )}
+            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+              {renderWidget(widgetConfig)}
+            </div>
           </div>
         ))}
       </GridLayout>

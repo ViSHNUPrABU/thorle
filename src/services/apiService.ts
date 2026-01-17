@@ -88,3 +88,38 @@ export async function fetchWidgetData(
   const ctx = context || contextService.getAll();
   return fetchData(dataSource, ctx);
 }
+
+/**
+ * Fetch list of all dashboards
+ */
+export async function fetchDashboardsList(): Promise<any[]> {
+  const response = await axios.get('/api/dashboards');
+  return response.data;
+}
+
+/**
+ * Fetch database metrics
+ */
+export async function fetchDatabaseMetrics(): Promise<any> {
+  const response = await axios.get('/api/database/metrics');
+  return response.data;
+}
+
+/**
+ * Route loaders for react-router
+ */
+export const dashboardsLoader = async () => {
+  return fetchDashboardsList();
+};
+
+export const dashboardDetailLoader = async ({ params }: { params: any }) => {
+  if (!params.id) {
+    throw new Error('Dashboard ID is required');
+  }
+  return fetchDashboardConfig(params.id);
+};
+
+export const databaseLoader = async () => {
+  return fetchDatabaseMetrics();
+};
+

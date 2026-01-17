@@ -1,28 +1,36 @@
-// src/components/Dashboard/DashboardListPage.tsx
+// src/pages/Dashboards/DashboardsListPage.tsx
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { appConfig } from '../../configs/dashboards';
+import { Link, useLoaderData } from 'react-router-dom';
 
-export const DashboardListPage: React.FC = () => {
+interface DashboardItem {
+  id: string;
+  title: string;
+  meta?: Record<string, any>;
+  widgetCount?: number;
+}
+
+export const DashboardsListPage: React.FC = () => {
+  const dashboards = useLoaderData() as DashboardItem[];
+
   return (
-    <div style={{ 
+    <div style={{
       padding: '2rem',
       background: '#fafafa',
-      height: '100%',
+      minHeight: '100%',
       overflow: 'auto',
     }}>
       <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 600 }}>
         Dashboards
       </h2>
-      <div style={{ 
-        display: 'grid', 
+      <div style={{
+        display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
         gap: '1.5rem',
       }}>
-        {appConfig.dashboards.map(dashboard => (
+        {dashboards.map(dashboard => (
           <Link
             key={dashboard.id}
-            to={`/dash/${dashboard.id}`}
+            to={`/dashboards/${dashboard.id}`}
             style={{
               display: 'block',
               padding: '1.5rem',
@@ -42,19 +50,19 @@ export const DashboardListPage: React.FC = () => {
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            <h3 style={{ 
-              margin: '0 0 0.5rem 0', 
+            <h3 style={{
+              margin: '0 0 0.5rem 0',
               fontSize: '1.125rem',
               fontWeight: 600,
             }}>
               {dashboard.title}
             </h3>
-            <p style={{ 
-              margin: 0, 
-              fontSize: '0.875rem', 
+            <p style={{
+              margin: 0,
+              fontSize: '0.875rem',
               color: '#666',
             }}>
-              {dashboard.layout.length} widgets
+              {dashboard.widgetCount || 0} widgets
             </p>
           </Link>
         ))}

@@ -296,6 +296,33 @@ app.get('/api/metrics/response-time', (req, res) => {
   });
 });
 
+// Database metrics endpoint
+app.get('/api/database/metrics', (req, res) => {
+  const now = Date.now();
+  const timestamps = [];
+  const values = [];
+
+  // Generate 24 hours of QPS history (hourly)
+  for (let i = 23; i >= 0; i--) {
+    const time = new Date(now - i * 60 * 60 * 1000);
+    timestamps.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+    values.push(Math.floor(1000 + Math.random() * 500));
+  }
+
+  res.json({
+    activeConnections: Math.floor(40 + Math.random() * 20),
+    queriesPerSecond: Math.floor(1200 + Math.random() * 300),
+    slowQueries: Math.floor(Math.random() * 10),
+    replicationLag: (Math.random() * 0.5).toFixed(2),
+    bufferPoolHitRatio: (99 + Math.random()).toFixed(2),
+    innodbPendingIO: Math.floor(Math.random() * 5),
+    qpsHistory: {
+      timestamps,
+      values,
+    },
+  });
+});
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
@@ -303,8 +330,11 @@ app.listen(PORT, () => {
   console.log(`\nAvailable endpoints:`);
   console.log(`  GET /api/dashboards           - List all dashboards`);
   console.log(`  GET /api/dashboards/:id       - Get dashboard config`);
+  console.log(`  GET /api/database/metrics     - Get MySQL database metrics`);
   console.log(`\nAvailable dashboards:`);
   Object.keys(dashboards).forEach(id => {
-    console.log(`  - ${id}: http://localhost:5173/dash/${id}`);
+    console.log(`  - ${id}: http://localhost:5173/dashboards/${id}`);
   });
+  console.log(`\nDatabase monitoring:`);
+  console.log(`  - MySQL metrics: http://localhost:5173/database`);
 });

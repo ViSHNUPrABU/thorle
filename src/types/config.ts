@@ -70,7 +70,6 @@ export type StaticLayoutItem = {
   // Component type - has component name
   component?: string;
   props?: Record<string, any>;
-  routes?: { path: string; component: string }[];
   
   // Size properties - more flexible
   // Can use: "200px", "20%", "10rem", or omit for flex

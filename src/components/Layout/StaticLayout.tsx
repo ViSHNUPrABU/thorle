@@ -166,7 +166,7 @@ const StaticLayoutItemRenderer: React.FC<StaticLayoutItemProps> = ({ item }) => 
 
     return (
       <div style={baseStyle}>
-        <Component {...(item.props || {})} routes={item.routes} />
+        <Component {...(item.props || {})} />
       </div>
     );
   }

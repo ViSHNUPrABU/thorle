@@ -1,48 +1,148 @@
 {
-  "name": "monithor",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "mock-api": "node mock-api-server.cjs",
-    "dev:full": "concurrently \"npm run mock-api\" \"npm run dev\""
+  "name": "thorify",
+  "version": "1.0.0",
+  "description": "Server-driven UI component library for building dynamic dashboards and monitoring interfaces from JSON configurations",
+  "keywords": [
+    "server-driven-ui",
+    "sdui",
+    "dashboard",
+    "monitoring",
+    "react-components",
+    "dynamic-ui",
+    "json-driven",
+    "config-driven"
+  ],
+  "homepage": "https://github.com/your-org/thorify#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/thorify.git"
   },
-  "dependencies": {
-    "@mantine/core": "^6.0.22",
-    "@mantine/hooks": "^6.0.22",
-    "@tanstack/react-query": "^5.90.6",
-    "ajv": "^8.17.1",
-    "axios": "^1.13.1",
-    "cors": "^2.8.5",
-    "echarts": "^5.6.0",
-    "echarts-for-react": "^3.0.2",
-    "express": "^5.1.0",
-    "mantine-react-table": "^1.3.4",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-grid-layout": "^1.5.2",
-    "react-router-dom": "^7.9.5",
-    "zustand": "^5.0.8"
+  "bugs": {
+    "url": "https://github.com/your-org/thorify/issues"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./components": {
+      "import": "./dist/components.js",
+      "require": "./dist/components.cjs",
+      "types": "./dist/components.d.ts"
+    },
+    "./sdui": {
+      "import": "./dist/sdui.js",
+      "require": "./dist/sdui.cjs",
+      "types": "./dist/sdui.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs",
+      "types": "./dist/utils.d.ts"
+    },
+    "./services": {
+      "import": "./dist/services.js",
+      "require": "./dist/services.cjs",
+      "types": "./dist/services.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs",
+      "types": "./dist/types.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "tsc && vite build",
+    "build:storybook": "storybook build",
+    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "peerDependencies": {
+    "@mantine/core": ">=6.0.0",
+    "@mantine/hooks": ">=6.0.0",
+    "@tanstack/react-query": ">=5.0.0",
+    "axios": ">=1.0.0",
+    "echarts": ">=5.0.0",
+    "echarts-for-react": ">=3.0.0",
+    "mantine-react-table": ">=1.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "react-grid-layout": ">=1.3.0",
+    "react-router-dom": ">=6.0.0",
+    "zod": ">=3.0.0",
+    "zustand": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "echarts": {
+      "optional": true
+    },
+    "echarts-for-react": {
+      "optional": true
+    },
+    "mantine-react-table": {
+      "optional": true
+    },
+    "react-grid-layout": {
+      "optional": true
+    },
+    "react-router-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^3.2.0",
     "@eslint/js": "^9.36.0",
-    "@types/node": "^24.6.0",
+    "@storybook/addon-essentials": "^8.4.0",
+    "@storybook/addon-interactions": "^8.4.0",
+    "@storybook/addon-links": "^8.4.0",
+    "@storybook/blocks": "^8.4.0",
+    "@storybook/react": "^8.4.0",
+    "@storybook/react-vite": "^8.4.0",
+    "@storybook/test": "^8.4.0",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@types/react-grid-layout": "^1.3.5",
     "@vitejs/plugin-react": "^5.0.4",
-    "baseline-browser-mapping": "^2.9.15",
-    "concurrently": "^9.2.1",
+    "@vitest/coverage-v8": "^2.1.0",
+    "autoprefixer": "^10.4.27",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
+    "eslint-plugin-storybook": "^0.11.0",
     "globals": "^16.4.0",
+    "jsdom": "^25.0.0",
+    "postcss": "^8.5.8",
+    "prop-types": "^15.8.1",
+    "storybook": "^8.4.0",
+    "tailwindcss": "^4.2.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
-    "vite": "^7.1.7"
+    "vite": "^6.3.0",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^2.1.0"
   }
 }

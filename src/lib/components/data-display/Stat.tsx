@@ -1,7 +1,7 @@
-import React from 'react';
-import { Card, Text, Group } from '@mantine/core';
-import { z } from 'zod';
-import { sduiRegistry } from '../../sdui/registry/Registry';
+import React from 'react'
+import { Card, Text, Group } from '@mantine/core'
+import { z } from 'zod'
+import { sduiRegistry } from '../../sdui/registry/Registry'
 
 const StatPropsSchema = z.object({
   label: z.string(),
@@ -11,10 +11,10 @@ const StatPropsSchema = z.object({
   trend: z.enum(['up', 'down', 'neutral']).optional(),
   trendValue: z.union([z.string(), z.number()]).optional(),
   className: z.string().optional(),
-  data: z.any().optional(),
-});
+  data: z.unknown().optional(),
+})
 
-type StatProps = z.infer<typeof StatPropsSchema>;
+export type StatProps = z.infer<typeof StatPropsSchema>
 
 export const Stat: React.FC<StatProps & { id?: string }> = ({
   label,
@@ -27,30 +27,29 @@ export const Stat: React.FC<StatProps & { id?: string }> = ({
   data,
   id,
 }) => {
-  const displayValue = data?.value ?? value;
-  const displayLabel = data?.label ?? label;
-  const displayTrend = data?.trend ?? trend;
-  const displayTrendValue = data?.trendValue ?? trendValue;
+  const displayValue = data?.value ?? value
+  const displayLabel = data?.label ?? label
+  const displayTrend = data?.trend ?? trend
+  const displayTrendValue = data?.trendValue ?? trendValue
 
-  const trendColor = displayTrend === 'up' ? 'green' : displayTrend === 'down' ? 'red' : 'gray';
-  const trendIcon = displayTrend === 'up' ? '↑' : displayTrend === 'down' ? '↓' : '→';
+  const trendColor = displayTrend === 'up' ? 'green' : displayTrend === 'down' ? 'red' : 'gray'
+  const trendIcon = displayTrend === 'up' ? '\u2191' : displayTrend === 'down' ? '\u2193' : '\u2192'
 
-  void _color;
   return (
     <Card id={id} shadow="sm" p="lg" radius="md" withBorder className={`w-full ${className}`}>
-      <Group position="apart" mb="xs">
-        <Text size="sm" color="dimmed">{displayLabel}</Text>
+      <Group justify="space-between" mb="xs">
+        <Text size="sm" c="dimmed">{displayLabel}</Text>
         {icon && <span>{icon}</span>}
       </Group>
-      <Text size="xl" weight={700} mb="xs">{String(displayValue)}</Text>
+      <Text size="xl" fw={700} mb="xs">{String(displayValue)}</Text>
       {displayTrend && displayTrendValue && (
-        <Text size="xs" color={trendColor}>
+        <Text size="xs" c={trendColor}>
           {trendIcon} {displayTrendValue}
         </Text>
       )}
     </Card>
-  );
-};
+  )
+}
 
 sduiRegistry.register('Stat', {
   component: Stat,
@@ -62,4 +61,4 @@ sduiRegistry.register('Stat', {
     tags: ['stat', 'kpi', 'metric'],
   },
   defaultProps: { color: 'blue' },
-});
+})

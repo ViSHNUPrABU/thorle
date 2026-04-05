@@ -149,11 +149,6 @@
     "vitest": "^2.1.0",
     "zod": "^3.25.76",
     "zustand": "^5.0.8",
-    "@storybook/addon-vitest": "^10.3.4",
-    "@storybook/addon-a11y": "^10.3.4",
-    "@storybook/addon-docs": "^10.3.4",
-    "@storybook/addon-onboarding": "^10.3.4",
-    "playwright": "^1.59.1",
-    "@vitest/browser": "^2.1.0"
+    "playwright": "^1.59.1"
   }
 }

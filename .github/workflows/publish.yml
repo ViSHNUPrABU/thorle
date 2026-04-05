@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           cache: npm
           registry-url: https://registry.npmjs.org/
-      - run: npm ci
+      - run: npm install --legacy-peer-deps
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test

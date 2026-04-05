@@ -1,14 +1,14 @@
-# Thorify
+# Thorle
 
-[![CI](https://github.com/your-org/thorify/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/thorify/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/thorify.svg)](https://www.npmjs.com/package/thorify)
+[![CI](https://github.com/your-org/thorle/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/thorle/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/thorle.svg)](https://www.npmjs.com/package/thorle)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > Server-driven UI component library for building dynamic dashboards and monitoring interfaces from JSON configurations.
 
-## Why Thorify?
+## Why Thorle?
 
-Thorify lets you build entire monitoring dashboards from backend JSON configs. Change your UI without redeploying frontend code. Define screens, widgets, layouts, data sources, visibility rules, and actions all in JSON -- Thorify renders them.
+Thorle lets you build entire monitoring dashboards from backend JSON configs. Change your UI without redeploying frontend code. Define screens, widgets, layouts, data sources, visibility rules, and actions all in JSON -- Thorle renders them.
 
 ### Key Benefits
 
@@ -24,12 +24,12 @@ Thorify lets you build entire monitoring dashboards from backend JSON configs. C
 ## Installation
 
 ```bash
-npm install thorify
+npm install thorle
 ```
 
 ### Peer Dependencies
 
-Thorify requires these peer dependencies:
+Thorle requires these peer dependencies:
 
 ```bash
 npm install react react-dom @mantine/core @mantine/hooks @tanstack/react-query axios zod zustand
@@ -63,7 +63,7 @@ function App({ children }: { children: React.ReactNode }) {
 ### 2. Register components with the SDUI registry
 
 ```tsx
-import { sduiRegistry, Stat, Card } from 'thorify'
+import { sduiRegistry, Stat, Card } from 'thorle'
 import { z } from 'zod'
 
 sduiRegistry.register('Stat', {
@@ -97,7 +97,7 @@ sduiRegistry.register('Card', {
 ### 3. Render from JSON config
 
 ```tsx
-import { SDUIRenderer } from 'thorify'
+import { SDUIRenderer } from 'thorle'
 
 const config = {
   version: '1.0.0',
@@ -132,7 +132,7 @@ function DashboardPage() {
 
 ```tsx
 import { useState, useEffect } from 'react'
-import { SDUIRenderer, validateSDUIConfig } from 'thorify'
+import { SDUIRenderer, validateSDUIConfig } from 'thorle'
 
 function DynamicPage({ screenId }: { screenId: string }) {
   const [config, setConfig] = useState(null)
@@ -158,11 +158,11 @@ function DynamicPage({ screenId }: { screenId: string }) {
 ## Subpath Exports
 
 ```tsx
-import { SDUIRenderer, sduiRegistry } from 'thorify/sdui'
-import { Stat, Badge, Progress, Button, Card, Grid, Tabs } from 'thorify/components'
-import { interpolateTemplate, evaluateVisibility } from 'thorify/utils'
-import { useWidgetData, contextService } from 'thorify/services'
-import type { SDUIConfig, WidgetConfig, ApiDataSource } from 'thorify/types'
+import { SDUIRenderer, sduiRegistry } from 'thorle/sdui'
+import { Stat, Badge, Progress, Button, Card, Grid, Tabs } from 'thorle/components'
+import { interpolateTemplate, evaluateVisibility } from 'thorle/utils'
+import { useWidgetData, contextService } from 'thorle/services'
+import type { SDUIConfig, WidgetConfig, ApiDataSource } from 'thorle/types'
 ```
 
 ## Component Catalog
